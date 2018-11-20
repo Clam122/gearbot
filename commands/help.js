@@ -1,11 +1,5 @@
-/*
-The HELP command is used to display every command's name and description
-to the user, so that he may see what commands are available. The help
-command is also filtered by level, so if a user does not have access to
-a command, it is not shown to them. If a command name is given with the
-help command, its extended help is shown.
-*/
-const {MessageEmbed} = require("discord.js")
+
+const {MessageEmbed} = require("discord.js");
 
 exports.run = (client, message, args, level) => {
   // If no specific command is called, show all filtered commands.
@@ -15,7 +9,7 @@ exports.run = (client, message, args, level) => {
 
     let categories = Array.from(new Set(myCommands.map(cmd => cmd.help.category)));
 
-    let embed = new MessageEmbed()
+    let embed = new MessageEmbed();
     
     categories.forEach(i => {
       let cmds = myCommands
@@ -25,14 +19,18 @@ exports.run = (client, message, args, level) => {
       embed.addField(i, cmds);
     });
 
-    message.channel.send(embed)
+    message.channel.send(embed);
   } else {
     // Show individual command's help.
     let command = args[0];
     if (client.commands.has(command)) {
       command = client.commands.get(command);
       if (level < client.levelCache[command.conf.permLevel]) return;
-      message.channel.send(`= ${command.help.name} = \n${command.help.description}\nusage:: ${command.help.usage}\naliases:: ${command.conf.aliases.join(", ")}\n= ${command.help.name} =`, {code:"asciidoc"});
+      let embed = new MessageEmbed()
+        .setTitle(command.help.name)
+        .setDescription(command.help.description)
+        .addField("Usage", command.help.usage);      
+      message.channel.send(embed);
     }
   }
 };
