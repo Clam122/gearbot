@@ -6,7 +6,7 @@ const Discord = require("discord.js");
 const { promisify } = require("util");
 const readdir = promisify(require("fs").readdir);
 const Enmap = require("enmap");
-
+const yt = require("simple-youtube-api");
 //Client
 const client = new Discord.Client({
   disableEveryone: true
@@ -19,6 +19,8 @@ require("./modules/functions.js")(client);
 client.commands = new Enmap();
 client.aliases = new Enmap();
 client.settings = new Enmap({name: "settings"});
+client.queue = new Map();
+client.youtube = new yt(client.config.ytapikey);
 
 //Init function;
 const init = async () => {

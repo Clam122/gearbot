@@ -1,3 +1,4 @@
+const ytdl = require("ytdl-core");
 module.exports = (client) => {
 
   /*
@@ -144,19 +145,33 @@ module.exports = (client) => {
     }
   });
 
+  client.play = (guild, song) => {
+    const serverQueue = client.queue.get(guild.id);
+    
+    if(!song) {
+      serverQueue.voiceChannel.leave();
+      client.queue.delete(guild.id);
+      return;
+    }
+    
+    const dispatcher = serverQueue.connection.play(ytdl(song.url))
+      .on("end",  () => {
+        serverQueue.songs.shift();
+        client.play(guild, serverQueue.songs[0])
+      })
+      .on("error", (e) => client.logger.error(e));
+    serverQueue.textChannel.send(`:white_check_mark: Now playing: \`${song.title}\``);
+  }
+
   // `await client.wait(1000);` to "pause" for 1 second.
   client.wait = require("util").promisify(setTimeout);
 
   // These 2 process methods will catch exceptions and give *more details* about the error and stack trace.
   process.on("uncaughtException", (err) => {
-    const errorMsg = err.stack.replace(new RegExp(`${__dirname}/`, "g"), "./");
-    client.logger.error(`Uncaught Exception: ${errorMsg}`);
-    // Always best practice to let the code crash on uncaught exceptions. 
-    // Because you should be catching them anyway.
-    process.exit(1);
+    console.error(err.stack)
   });
 
   process.on("unhandledRejection", err => {
-    client.logger.error(`Unhandled rejection: ${err}`);
+    console.log(err.stack)
   });
 };

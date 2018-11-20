@@ -14,6 +14,9 @@
     "enmap": "^4.2.1",
     "moment": "^2.20.1",
     "moment-duration-format": "^2.2.0",
-    "prism-media": "^0.0.3"
+    "opusscript": "^0.0.6",
+    "prism-media": "^0.0.3",
+    "simple-youtube-api": "^5.1.1",
+    "ytdl-core": "^0.28.0"
   }
 }

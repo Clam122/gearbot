@@ -5,6 +5,7 @@ command is also filtered by level, so if a user does not have access to
 a command, it is not shown to them. If a command name is given with the
 help command, its extended help is shown.
 */
+const {MessageEmbed} = require("discord.js")
 
 exports.run = (client, message, args, level) => {
   // If no specific command is called, show all filtered commands.
@@ -12,23 +13,19 @@ exports.run = (client, message, args, level) => {
     // Filter all commands by which are available for the user's level, using the <Collection>.filter() method.
     const myCommands = message.guild ? client.commands.filter(cmd => client.levelCache[cmd.conf.permLevel] <= level) : client.commands.filter(cmd => client.levelCache[cmd.conf.permLevel] <= level &&  cmd.conf.guildOnly !== true);
 
-    // Here we have to get the command names only, and we use that array to get the longest name.
-    // This make the help commands "aligned" in the output.
-    const commandNames = myCommands.keyArray();
-    const longest = commandNames.reduce((long, str) => Math.max(long, str.length), 0);
+    let categories = Array.from(new Set(myCommands.map(cmd => cmd.help.category)));
 
-    let currentCategory = "";
-    let output = `= Command List =\n\n[Use ${message.settings.prefix}help <commandname> for details]\n`;
-    const sorted = myCommands.array().sort((p, c) => p.help.category > c.help.category ? 1 :  p.help.name > c.help.name && p.help.category === c.help.category ? 1 : -1 );
-    sorted.forEach( c => {
-      const cat = c.help.category.toProperCase();
-      if (currentCategory !== cat) {
-        output += `\u200b\n== ${cat} ==\n`;
-        currentCategory = cat;
-      }
-      output += `${message.settings.prefix}${c.help.name}${" ".repeat(longest - c.help.name.length)} :: ${c.help.description}\n`;
+    let embed = new MessageEmbed()
+    
+    categories.forEach(i => {
+      let cmds = myCommands
+        .filter(cmd => cmd.help.category === i)
+        .map(c => `\`${c.help.name}\``)
+        .join(" ");
+      embed.addField(i, cmds);
     });
-    message.channel.send(output, {code: "asciidoc", split: { char: "\u200b" }});
+
+    message.channel.send(embed)
   } else {
     // Show individual command's help.
     let command = args[0];
